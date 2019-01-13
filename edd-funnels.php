@@ -39,7 +39,7 @@ add_action( 'init', 'eddfunnels_load_textdomain' );
  */
 function eddfunnels_set( $var, $key, $def = '' ) {
 
-	if (is_array($var) && isset( $var, $key ) ) {
+	if (is_array($var) && isset( $var[$key] ) ) {
 		return $var[$key];
 	} else if ( is_object($var) && isset($var->{$key} ) ) {
 		return $var->{$key};
@@ -60,3 +60,5 @@ if ( ! function_exists('printr') ) {
 
 require_once EDDFS_PATH . 'includes/metabox.php';
 require_once EDDFS_PATH . 'includes/ajax.php';
+require_once EDDFS_PATH . 'includes/funnels.php';
+require_once EDDFS_PATH . 'includes/display-funnel.php';
