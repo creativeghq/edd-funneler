@@ -57,12 +57,23 @@ Vue.component('edd-funnels-metabox', {
 					return;
 				}
 				this.funnels.push(selectedopt)
-				this.comps.push({is: 'downloads_list', props: {title: 'Select Download', tag: selectedopt, object_id: null}})
+				this.comps.push({is: 'downloads_list', props: {title: 'Select Download', tag: selectedopt}, object_id: null})
 				this.bump_added = true
 				
+			} else if(selectedopt === 'upsells' ) {
+				if ( this.upsells_added ) {
+					alert("You can add upsells item once");
+					return;
+				}
+				this.funnels.push(selectedopt)
+				this.comps.push({is: 'downloads_multi_list', props: {title: 'Select Downloads', tag: selectedopt}, object_id: []})
+				this.upsells_added = true
+				setTimeout(function(){
+					$('.chosen').chosen();
+				}, 500);
 			} else {
 				this.funnels.push(selectedopt)
-				this.comps.push({is: 'modal_html', props: {title: 'Select Page', tag: selectedopt, object_id: null}})
+				this.comps.push({is: 'modal_html', props: {title: 'Select Page', tag: selectedopt}, object_id: null})
 			}
 			this.initSortabel()
 		},
@@ -103,6 +114,9 @@ Vue.component('edd-funnels-metabox', {
 				if ( type === 'bump' ) {
 					this.bump_added = false
 				}
+				if ( type == 'upsells' ) {
+					this.upsells_added = false
+				}
 			}
 		},
 		process_meta() {
@@ -117,7 +131,18 @@ Vue.component('edd-funnels-metabox', {
 						thisis.bump_added = true
 					}
 					
-				} else {
+				} else if(elem.type === 'upsells' ) {
+					if ( thisis.upsells_added ) {
+						alert("You can add upsells item once");
+						return;
+					}
+					thisis.funnels.push(elem.type)
+					thisis.comps.push({is: 'downloads_multi_list', props: {title: 'Select Downloads', tag: elem.type}, object_id: elem.object_id})
+					thisis.upsells_added = true
+					setTimeout(function(){
+						$('.chosen').chosen();
+					}, 2000); 
+				}  else {
 					thisis.funnels.push(elem.type)
 					thisis.comps.push({is: 'modal_html', props: {title: 'Select Page', tag: elem.type}, object_id: elem.object_id})
 				}
@@ -154,6 +179,18 @@ Vue.component('downloads_list', {
 					\</div>'
 })
 
+Vue.component('downloads_multi_list', {
+	props: {
+		title: String,
+		tag: String
+	},
+	template: '<div class="edd-funnels-section ui-state-default">\
+						\<slot></slot>\
+						\<div class="input-group">\
+							\<slot name="multi_downloads"></slot>\
+						\</div>\
+					\</div>'
+})
 
 
 var vm = new Vue({

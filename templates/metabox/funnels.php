@@ -18,7 +18,7 @@
 			<div v-if="enabled">
 				<div id="dyanmic-funnels">
 					<template v-for="(comp, index) in comps">
-						
+
 						<component :is="comp.is" :title="comp.props.title" :tag="comp.props.tag">
 							
 							<span @click="remove(index, comp.props.tag)" class="close dashicons dashicons-no-alt"></span>
@@ -41,6 +41,15 @@
 									<select :name="'edd_funnels['+index+'][object_id]'" required v-model="comps[index].object_id">
 										<option value=""><?php esc_html_e('--Select--', 'edd-funnels'); ?></option>
 										<option v-for="item in pages" :value="item.ID">
+											{{ item.post_title }}
+										</option>
+									</select>
+								</template>
+
+								<template slot="multi_downloads">
+									<label>{{ comp.props.title }}</label>
+									<select multiple :name="'edd_funnels['+index+'][object_id][]'" required v-model="comps[index].object_id" data-placeholder="Choose Items..." class="chosen">
+										<option v-for="item in downloads" :value="item.ID">
 											{{ item.post_title }}
 										</option>
 									</select>

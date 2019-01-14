@@ -7,6 +7,7 @@ class EDD_Funnels_Display_Funnel
 	static $doing;
 	static $session;
 	static $is_ajax;
+	static $edd_ajax;
 
 	static function init() {
 
@@ -15,6 +16,37 @@ class EDD_Funnels_Display_Funnel
 		self::$session = EDD_Funnels_Loader::get_session_data();
 
 		self::$is_ajax = esc_attr( eddfunnels_set( $_POST, 'ajax' ) );
+		self::$edd_ajax = esc_attr( eddfunnels_set( $_POST, 'edd_ajax' ) );
+		
+	}
+
+	static function enqueue() {
+		self::init();
+		
+		$checkout_page = edd_get_option( 'purchase_page', false );
+		wp_enqueue_script( 'edd-funnels-frontend', EDDFS_URL . 'assets/js/edd-funnels-frontend.js', array('jquery'), 1.0, true );
+
+		if ( self::$doing || is_page( $checkout_page ) ) {
+			$data = array(
+				'ajaxurl'		=> admin_url('admin-ajax.php'),
+				'nonce'			=> wp_create_nonce( NONCE_KEY ),
+				'checkout_url'	=> get_permalink( edd_get_option( 'purchase_page', false ) )
+			);
+			wp_localize_script( 'edd-funnels-frontend', 'edd_funnels_data', $data );
+
+			if ( ! wp_script_is( 'bootstrap', 'registered' ) ) {
+				wp_enqueue_script( 'bootstrap', EDDFS_URL . 'assets/js/bootstrap.min.js', array('jquery'), '', true );
+			}
+
+			if ( ! wp_style_is( 'bootstrap', 'registered' ) ) {
+				wp_enqueue_style( 'bootstrap', EDDFS_URL . 'assets/css/bootstrap.min.css' );
+			}
+
+			if ( esc_attr( eddfunnels_set( $_GET, 'show_modal') ) ) {
+			}
+
+			wp_enqueue_style( 'edd-funnels-frontend', EDDFS_URL . 'assets/css/edd-funnels-frontend.css' );
+		}
 	}
 
 	/**
@@ -32,13 +64,14 @@ class EDD_Funnels_Display_Funnel
 		$id = eddfunnels_set( $step, 'object_id' );
 		//exit($type);
 		if ( $type == 'modal' ) {
-			self::modal($step, $index);
+			return self::modal($step, $index);
 		} else if ( $type == 'bump' ) {
-			self::bump($step, $index);
+			return self::bump($step, $index);
 		} else if ( $type == 'upsells' ) {
-			self::pages($step, $index);
+			return self::upsells($step, $index);
 		} else {
-			self::pages($step, $index);
+
+			return self::pages($step, $index);
 		}
 
 	}
@@ -51,7 +84,81 @@ class EDD_Funnels_Display_Funnel
 	 * @return [type]        [description]
 	 */
 	static protected function modal($step, $index) {
-		exit('modal');
+		if ( false ) {
+			//$modal_object_id = eddfunnels_set( $step, 'object_id');
+			//$modal_content = 
+			/*EDD_Funnels_Loader::up_step();
+
+			$session_data = EDD_Funnels_Loader::current_step();
+			$new_step = eddfunnels_set( $session_data, 'step');
+			$new_index = eddfunnels_set( $session_data, 'index');
+
+			$obj_id = eddfunnels_set( $new_step, 'object_id' );
+			$page = get_post( $obj_id );
+
+			if ( $page ) {
+				$url = add_query_arg('doing_funnel', true, get_permalink($post->ID));
+				$url = add_query_arg('show_modal', true, $url);
+				wp_redirect( esc_url( $url ) );exit;
+			}*/
+			/*$checkout_page = edd_get_option( 'purchase_page', false );
+
+			if ( $checkout_page && get_page( $checkout_page ) && ! is_page( $checkout_page ) ) {
+
+				EDD_Funnels_Loader::up_step();
+
+				$url = add_query_arg('doing_funnel', true, get_permalink($checkout_page));
+				$url = add_query_arg('show_modal', true, $url);
+
+				wp_redirect( esc_url($url) );exit;
+			}*/
+
+		} /*else if ( EDD_Funnels_Loader::is_last_step() ) {
+			$checkout_page = edd_get_option( 'purchase_page', false );
+
+			if ( $checkout_page && get_page( $checkout_page ) && ! is_page( $checkout_page ) ) {
+
+				EDD_Funnels_Loader::up_step();
+
+				$url = add_query_arg('doing_funnel', true, get_permalink($checkout_page));
+				$url = add_query_arg('show_modal', true, $url);
+
+				wp_redirect( esc_url($url) );exit;
+			}
+		}*/ 
+		else {
+
+			if ( self::$is_ajax || self::$edd_ajax ) {
+				$obj_id = eddfunnels_set( $step, 'object_id' );
+				$page = get_post( $obj_id );
+
+				if ( $page ) {
+					$content = apply_filters( 'the_content', $page->post_content );
+					EDD_Funnels_Loader::up_step();
+
+					/*if ( self::is_next_bump($index) ) {
+						$bump_data = self::get_next($index);
+
+						ob_start();
+
+						self::render_bump($bump_data);
+
+						$content .= ob_get_clean();
+						//EDD_Funnels_Loader::up_step();
+					}*/
+					wp_send_json( array(
+						'type'		=> 'show_modal',
+						'content'	=> $content
+					) );
+				}
+			}
+		}
+
+		/*if ( self::$is_ajax) {
+			wp_send_json( array('success' => false, 'message' => esc_html__('Modal Has issues', 'edd-funnels')), 403 );
+		} else {
+			self::redirect_checkout();
+		}*/
 	}
 
 	/**
@@ -62,19 +169,60 @@ class EDD_Funnels_Display_Funnel
 	 * @return [type]        [description]
 	 */
 	static protected function bump($step, $index) {
-		$checkout_page = edd_get_option( 'purchase_page', false );
 
-		if ( $checkout_page && get_page( $checkout_page ) ) {
+		if ( $index == 0 ) {
+			$checkout_page = edd_get_option( 'purchase_page', false );
 
-			EDD_Funnels_Loader::up_step();
+			if ( $checkout_page && get_page( $checkout_page ) && ! is_page( $checkout_page ) ) {
 
-			$url = add_query_arg('doing_funnel', true, get_permalink($checkout_page));
+				EDD_Funnels_Loader::up_step();
 
-			wp_redirect( esc_url($url) );exit;
+				$url = add_query_arg('doing_funnel', true, get_permalink($checkout_page));
+
+				//wp_redirect( esc_url($url) );exit;
+			}
+		} else {
+			$obj_id = eddfunnels_set( $step, 'object_id' );
+			//$download = get_post( $obj_id );
+
+			if ( $obj_id ) {
+				ob_start();
+
+				self::render_bump($step);
+
+				$content = ob_get_clean();
+
+				if ( $content ) {
+					EDD_Funnels_Loader::up_step();
+					wp_send_json( array(
+						'type'		=> 'show_modal',
+						'content'	=> $content
+					) );
+				}
+			}
 		}
-		exit('dump');
+		exit('bump');
 	}
 
+	static protected function upsells($step, $index) {
+		//$session = EDD_Funnels_Loader::get_session_data();
+		//printr($step);
+		if ( eddfunnels_set( $step, 'object_id' ) ) {
+			ob_start();
+
+			include EDDFS_PATH . 'templates/upsells.php';
+
+			$content = ob_get_clean();
+
+			if ( $content ) {
+				EDD_Funnels_Loader::up_step();
+				wp_send_json( array(
+					'type'		=> 'show_modal',
+					'content'	=> $content
+				) );
+			}
+		}
+	}
 	/**
 	 * [pages description]
 	 *
@@ -83,7 +231,33 @@ class EDD_Funnels_Display_Funnel
 	 * @return [type]        [description]
 	 */
 	static protected function pages($step, $index) {
-		exit('pages');
+
+		$obj_id = eddfunnels_set( $step, 'object_id' );
+		$page = get_post( $obj_id );
+
+		if ( $page ) {
+			$url = add_query_arg('doing_funnel', true, get_permalink($page->ID));
+			EDD_Funnels_Loader::up_step();
+			if ( self::$is_ajax || self::$edd_ajax ) {
+				wp_send_json( array('type' => 'redirect', 'next_url' => $url ) );
+			} else {
+
+				//wp_redirect( esc_url( $url ) );exit;
+			}
+		}
+
+		if ( EDD_Funnels_Loader::is_last_step($index) ) {
+			EDD_Funnels_Loader::finish_funnel();
+			if( self::$is_ajax || self::$edd_ajax ) {
+				$checkout_page = edd_get_option( 'purchase_page', false );
+				if ( $checkout_page ) {
+					wp_send_json( array('type' => 'redirect', 'next_url' => get_permalink($checkout_page) ) );
+				}
+			} else {
+				//self::redirect_checkout();
+			}
+		}
+		exit('page');
 	}
 
 	/**
@@ -95,10 +269,27 @@ class EDD_Funnels_Display_Funnel
 	static function content_filter($content) {
 		self::init();
 
-		if ( self::$doing ) {
+		$checkout_page = edd_get_option( 'purchase_page', false );
+
+		if ( self::$doing && ! is_page( $checkout_page ) ) {
+
+			$session = EDD_Funnels_Loader::get_session_data();
+			$index = eddfunnels_set( $session, 'step' );
+
+			if ( self::is_next_bump($index) ) {
+				$bump_data = self::get_next($index);
+
+				ob_start();
+
+				self::render_bump($bump_data);
+
+				$content .= ob_get_clean();
+				EDD_Funnels_Loader::up_step();
+			}
+
 			$buttons = '<div class="clearfix"></div><div class="edd-funnels-steps-buttons">';
-			$buttons = '<a href="javascript:void(0);" class="edd-funnels-btn-next">' . esc_html__( 'Next', 'edd-funnels' ) . '</a>';
-			$buttons .= '<a href="javascript:void(0);" class="edd-funnels-btn-skip">' . esc_html__( 'Skip', 'edd-funnels' ) . '</a>';
+			$buttons .= '<a href="javascript:void(0);" class="edd-funnels-btn-next">' . esc_html__( 'Next', 'edd-funnels' ) . '</a>';
+			//$buttons .= '<a href="javascript:void(0);" class="edd-funnels-btn-skip">' . esc_html__( 'Skip', 'edd-funnels' ) . '</a>';
 			$buttons .= '</div>';
 
 			$content .= $buttons;
@@ -107,6 +298,41 @@ class EDD_Funnels_Display_Funnel
 		return $content;
 	}
 
+	/**
+	 * Check whether next step is bump item so we append bump with the current step content.
+	 *
+	 * @param  [type]  $index [description]
+	 * @return boolean        [description]
+	 */
+	static function is_next_bump($index) {
+
+		$next = self::get_next($index);
+
+		if ( $next ) {
+			$type = eddfunnels_set( $next, 'type' );
+
+			return ( $type === 'bump' );
+		}
+
+		return false;
+	}
+
+	/**
+	 * GEt the data for next step
+	 * 
+	 * @param  [type] $index [description]
+	 * @return [type]        [description]
+	 */
+	static function get_next($index) {
+		$session = EDD_Funnels_Loader::get_session_data();
+		$meta = eddfunnels_set( $session, 'meta' );
+
+		$next_index = $index + 1;
+
+		$next = eddfunnels_set( $meta, $next_index );
+
+		return $next;		
+	}
 	/**
 	 * [checkout_bump description]
 	 * 
@@ -126,7 +352,20 @@ class EDD_Funnels_Display_Funnel
 			return;
 		}
 		$meta = eddfunnels_set( self::$session, 'meta' );
-		$step = array_shift( $meta );
+		$index = eddfunnels_set( $meta, 'step' );
+		$step = eddfunnels_set( $meta, $index );
+		if ( $step ) {
+			self::render_bump($step);
+		}
+	}
+
+	/**
+	 * [render_bump description]
+	 *
+	 * @param  [type] $step [description]
+	 * @return [type]       [description]
+	 */
+	static function render_bump($step) {
 		$obj_id = eddfunnels_set( $step, 'object_id' );
 		$download = get_post( $obj_id );
 
@@ -134,8 +373,43 @@ class EDD_Funnels_Display_Funnel
 			require EDDFS_PATH . 'templates/bump.php';
 		}
 	}
+
+	/**
+	 * If nothing happened then simply redirect back to checkout.
+	 *
+	 * @return [type] [description]
+	 */
+	static function redirect_checkout() {
+		$checkout_page = edd_get_option( 'purchase_page', false );
+
+		if ( $checkout_page && get_page( $checkout_page ) && ! is_page( $checkout_page ) ) {
+			wp_redirect( esc_url(get_permalink( $checkout_page )) );exit;
+		}
+	}
+
+	static function modal_content() {
+		
+
+		//if ( self::$doing ) {
+
+			/*$prev = EDD_Funnels_Loader::prev_step();
+			$step = eddfunnels_set( $prev, 'step' );
+			$index = eddfunnels_set( $prev, 'index' );
+			$object_id = eddfunnels_set( $prev, 'object_id' );
+
+			$post = get_post( $object_id );
+
+			if ( $post ) {*/
+				include EDDFS_PATH . 'templates/funnel-modal.php';
+			//}
+		//}
+	}
 }
 
 add_filter('the_content', array('EDD_Funnels_Display_Funnel', 'content_filter'));
 
 add_action('edd_purchase_form_before_cc_form', array('EDD_Funnels_Display_Funnel', 'checkout_bump') );
+
+add_action( 'wp_enqueue_scripts', array( 'EDD_Funnels_Display_Funnel', 'enqueue' ) );
+
+add_action('wp_footer', array('EDD_Funnels_Display_Funnel', 'modal_content'));

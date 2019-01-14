@@ -23,8 +23,10 @@ class EDD_Funnels_Metabox {
 		}
 		wp_enqueue_script(array('jquery-ui-sortabel') );
 		wp_enqueue_script( 'vue', 'https://cdnjs.cloudflare.com/ajax/libs/vue/2.5.16/vue.js', array(), '2.5.16', true );
+		wp_enqueue_script( 'jquery-chosen', EDDFS_URL . 'assets/js/chosen.jquery.min.js', array('jquery'), '1.0', true );
 		wp_enqueue_script( 'edd-funnels-admin', EDDFS_URL . 'assets/js/edd-funnels-admin.js', array('vue'), '1.0', true );
 
+		//wp_enqueue_style( 'jquery-chosen', EDDFS_URL . 'assets/css/chosen.min.css'  );
 		wp_enqueue_style( 'edd-funnels-metabox', EDDFS_URL . 'assets/css/metabox.css'  );
 	}
 

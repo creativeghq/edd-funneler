@@ -60,6 +60,10 @@
     left: 50px;
     border: 1px solid #ddd;
 }
+#edd-funnels-settings .chosen {
+	min-width: 60%;
+	width: 60%;
+}
 #edd-funnels-settings .edd-funnels-section.ui-sortable-helper::before,
 #edd-funnels-settings .edd-funnels-section:first-child::before {
     display: none;
