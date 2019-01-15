@@ -147,7 +147,10 @@ Vue.component('edd-funnels-metabox', {
 					thisis.comps.push({is: 'modal_html', props: {title: 'Select Page', tag: elem.type}, object_id: elem.object_id})
 				}
 			})
-			thisis.initSortabel()
+
+			setTimeout(function(){
+				thisis.initSortabel();
+			}, 1000);
 			
 		}
 	}

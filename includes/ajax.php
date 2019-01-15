@@ -68,13 +68,22 @@ class EDD_Funnels_Ajax {
 			wp_send_json( array('message' => esc_html__( 'Refresh the page and try again', 'edd-funnels' )), 403 );
 		}
 
-		wp_send_json( array('message' => 'Added to cart' ) );
+		$download_id = esc_attr( eddfunnels_set( $_POST, 'id' ) );
+		$options['quantity'] = 1;
+
+		edd_add_to_cart($download_id, $options);
+
+		wp_send_json( array('message' => esc_html__( 'Added to cart', 'edd-funnels' ) ) );
 	}
 
 	static function add_bump_remove_from_cart() {
 		if ( ! wp_verify_nonce( esc_attr( $_POST['nonce'] ), NONCE_KEY ) ) {
 			wp_send_json( array('message' => esc_html__( 'Refresh the page and try again', 'edd-funnels' )), 403 );
 		}
+
+		$download_id = esc_attr( eddfunnels_set( $_POST, 'id' ) );
+		$index = edd_get_item_position_in_cart( $download_id );
+		edd_remove_from_cart($index);
 
 		wp_send_json( array('message' => 'Removed from cart' ) );
 	}

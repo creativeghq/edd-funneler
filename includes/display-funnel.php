@@ -39,7 +39,7 @@ class EDD_Funnels_Display_Funnel
 			}
 
 			if ( ! wp_style_is( 'bootstrap', 'registered' ) ) {
-				wp_enqueue_style( 'bootstrap', EDDFS_URL . 'assets/css/bootstrap.min.css' );
+				//wp_enqueue_style( 'bootstrap', EDDFS_URL . 'assets/css/bootstrap.min.css' );
 			}
 
 			if ( esc_attr( eddfunnels_set( $_GET, 'show_modal') ) ) {
@@ -175,10 +175,15 @@ class EDD_Funnels_Display_Funnel
 
 			if ( $checkout_page && get_page( $checkout_page ) && ! is_page( $checkout_page ) ) {
 
-				EDD_Funnels_Loader::up_step();
+				//EDD_Funnels_Loader::up_step();
 
 				$url = add_query_arg('doing_funnel', true, get_permalink($checkout_page));
 
+				if ( self::$is_ajax || self::$edd_ajax ) {
+					wp_send_json( array('type' => 'redirect', 'next_url' => $url ) );
+				} else {
+					wp_redirect( esc_url( $url ) );exit;
+				}
 				//wp_redirect( esc_url($url) );exit;
 			}
 		} else {
@@ -241,8 +246,7 @@ class EDD_Funnels_Display_Funnel
 			if ( self::$is_ajax || self::$edd_ajax ) {
 				wp_send_json( array('type' => 'redirect', 'next_url' => $url ) );
 			} else {
-
-				//wp_redirect( esc_url( $url ) );exit;
+				wp_redirect( esc_url( $url ) );exit;
 			}
 		}
 
@@ -288,7 +292,7 @@ class EDD_Funnels_Display_Funnel
 			}
 
 			$buttons = '<div class="clearfix"></div><div class="edd-funnels-steps-buttons">';
-			$buttons .= '<a href="javascript:void(0);" class="edd-funnels-btn-next">' . esc_html__( 'Next', 'edd-funnels' ) . '</a>';
+			$buttons .= '<a href="javascript:void(0);" class="edd-funnels-btn-next btn btn-primary">' . esc_html__( 'Next', 'edd-funnels' ) . '</a><span class="edd-loading-ajax edd-loading hide"></span>';
 			//$buttons .= '<a href="javascript:void(0);" class="edd-funnels-btn-skip">' . esc_html__( 'Skip', 'edd-funnels' ) . '</a>';
 			$buttons .= '</div>';
 
@@ -352,9 +356,11 @@ class EDD_Funnels_Display_Funnel
 			return;
 		}
 		$meta = eddfunnels_set( self::$session, 'meta' );
-		$index = eddfunnels_set( $meta, 'step' );
+		$index = eddfunnels_set( self::$session, 'step' );
 		$step = eddfunnels_set( $meta, $index );
-		if ( $step ) {
+		
+		if ( $step && eddfunnels_set( $step, 'type') === 'bump' ) {
+			EDD_Funnels_Loader::up_step();
 			self::render_bump($step);
 		}
 	}

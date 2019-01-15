@@ -3,12 +3,16 @@ jQuery(document).ready(function($){
 	$('.edd-funnels-steps-buttons').on('click', '.edd-funnels-btn-next', function(e){
 
 		e.preventDefault();
-
+		var process_icon = $(this).parent().find('.edd-loading-ajax');
+		process_icon.removeClass('hide');
 		$.ajax({
 			url: edd_funnels_data.ajaxurl,
 			type: 'POST',
 			data: {action: 'edd_funnels_ajax', subaction: 'running_funnel', nonce: edd_funnels_data.nonce, ajax: true},
 			complete: function(res) {
+				
+				process_icon.addClass('hide');
+				
 				if(res.status === 200) {
 					console.log(res);
 					var json = res.responseJSON;
@@ -47,6 +51,10 @@ jQuery(document).ready(function($){
 				$('#'+mod_id).modal({
 					backdrop: 'static',
 				});
+			} else if(res.type === 'redirect') {
+				if ( res.next_url !== undefined ) {
+					window.location = res.next_url;
+				}
 			}
 		}
 	});

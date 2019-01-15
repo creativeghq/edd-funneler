@@ -11,7 +11,7 @@
 			</div>
 			<div class="modal-footer">
 				<div class="edd-funnels-steps-buttons">
-					<a href="javascript:void(0);" class="edd-funnels-btn-next btn btn-primary"><?php esc_html_e( 'Next', 'edd-funnels' ); ?></a>
+					<a href="javascript:void(0);" class="edd-funnels-btn-next btn btn-primary"><?php esc_html_e( 'Next', 'edd-funnels' ); ?></a><span class="edd-loading-ajax edd-loading hide"></span>
 				</div>
 			</div>
 		</div>
