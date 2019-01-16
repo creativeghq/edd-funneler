@@ -28,8 +28,14 @@ class EDD_Funnels_Ajax {
 	 */
 	static function pages_downloads_meta() {
 
+		if ( ! is_user_logged_in() ) {
+			wp_send_json( array('message' => esc_html__( 'Unauthorized access', 'edd-funnels' )), 403 );
+		}
 		if ( ! wp_verify_nonce( esc_attr( $_POST['nonce'] ), 'EDD_FUNNELS' ) ) {
 			wp_send_json( array('message' => esc_html__( 'Refresh the page and try again', 'edd-funnels' )), 403 );
+		}
+		if ( ! current_user_can( 'manage_options' ) ) {
+			wp_send_json( array('message' => esc_html__( 'Unauthorized access', 'edd-funnels' )), 403 );
 		}
 
 		$post_id = esc_attr( eddfunnels_set( $_POST, 'id') );
@@ -91,3 +97,4 @@ class EDD_Funnels_Ajax {
 
 
 add_action('wp_ajax_edd_funnels_ajax', array('EDD_Funnels_Ajax', 'init'));
+add_action('wp_ajax_nopriv_edd_funnels_ajax', array('EDD_Funnels_Ajax', 'init'));
