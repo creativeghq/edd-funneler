@@ -71,6 +71,13 @@ Vue.component('edd-funnels-metabox', {
 				setTimeout(function(){
 					$('.chosen').chosen();
 				}, 500);
+			} else if(selectedopt === 'modal' ) {
+				this.funnels.push(selectedopt)
+				this.comps.push({is: 'modal_html', props: {title: 'Select Downloads', tag: selectedopt}, object_id: []})
+				this.upsells_added = true
+				setTimeout(function(){
+					$('.chosen').chosen();
+				}, 500);
 			} else {
 				this.funnels.push(selectedopt)
 				this.comps.push({is: 'modal_html', props: {title: 'Select Page', tag: selectedopt}, object_id: null})
@@ -144,7 +151,8 @@ Vue.component('edd-funnels-metabox', {
 					}, 2000); 
 				}  else {
 					thisis.funnels.push(elem.type)
-					thisis.comps.push({is: 'modal_html', props: {title: 'Select Page', tag: elem.type}, object_id: elem.object_id})
+					let label_ti = ( elem.type === 'modal' ) ? 'Enter Modal Content' : 'Select Page'; 
+					thisis.comps.push({is: 'modal_html', props: {title: label_ti, tag: elem.type}, object_id: elem.object_id})
 				}
 			})
 
@@ -164,7 +172,8 @@ Vue.component('modal_html', {
 	template: '<div class="edd-funnels-section ui-state-default">\
 						\<slot></slot>\
 						\<div class="input-group">\
-							\<slot name="pages"></slot>\
+							\<slot name="textarea" v-if="tag === \'modal\'"></slot>\
+							\<slot name="pages" v-else></slot>\
 						\</div>\
 					\</div>'
 });

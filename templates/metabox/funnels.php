@@ -55,6 +55,11 @@
 									</select>
 								</template>
 
+								<template slot="textarea">
+									<label>{{ comp.props.title }}</label>
+									<textarea :name="'edd_funnels['+index+'][object_id]'" required v-model="comps[index].object_id" rows="10" cols="60"></textarea>
+								</template>
+
 						</component>
 					</template>
 				</div>

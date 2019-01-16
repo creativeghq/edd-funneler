@@ -1,5 +1,31 @@
 jQuery(document).ready(function($){
 
+	var is_enabled = false;
+
+	function init() {
+		is_enabled = $('meta[name=edd-funnels-session-enabled]');
+		is_enabled = (is_enabled.length) ? true : false;
+
+		if ( is_enabled ) {
+			var ogin_btn = $('#edd_purchase_submit').find('input[type=submit]'),
+			classes = ogin_btn.attr('class');
+			text = ogin_btn.val();
+			ogin_btn.hide();
+
+			if(! $('.edd-funnels_purchased_button').length ) {
+				//$('#edd_purchase_submit').after('<div class=""><input type="submit" class="'+classes+' edd-funnels_purchased_button" value="'+text+'" /><span class="edd-loading-ajax edd-loading hide"></span></div>')
+				$('#edd_purchase_submit').after('<div class="clearfix"></div><div class="edd-funnels-steps-buttons"><a href="javascript:void(0);" class="edd-funnels-btn-next btn btn-primary">' + text + '</a><span class="edd-loading-ajax edd-loading hide"></span>');
+			}
+		}
+
+		if ( is_enabled ) {
+			$('body').on('click', '.edd-funnels_purchased_button', function(e){
+				e.preventDefault();
+				$('.edd-funnels-btn-next').trigger('click');
+			});
+		}
+	}
+	init();
 	$('.edd-funnels-steps-buttons').on('click', '.edd-funnels-btn-next', function(e){
 
 		e.preventDefault();
@@ -82,6 +108,7 @@ jQuery(document).ready(function($){
 								.html(json.message)
 								.addClass('alert alert-success');
 						}
+						location.reload();
 					} else {
 
 					}

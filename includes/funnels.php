@@ -6,40 +6,44 @@ class EDD_Funnels_Loader
 	static $id = 0;
 	static $session_key = 'edd_funnels_run';
 
+	static function newinit() {
+
+		if ( ! function_exists('EDD') ) {
+			return;
+		}
+		$checkout_page = edd_get_option( 'purchase_page', false );
+
+		if ( ! $checkout_page ) {
+			return;
+		}
+		if ( ! is_page( $checkout_page ) ) {
+			return;
+		}
+
+		if ( ! self::initial_checks() ) {
+			return;
+		}
+		
+		$session_data = self::get_session_data();
+
+		if ( ! eddfunnels_set($session_data, 'id') ) {
+			self::initiate_session();
+		}
+	}
 	/**
 	 * Main initatiation for Funnel.
 	 * 
 	 * @return [type] [description]
 	 */
 	static function init() {
-		//unset($_SESSION[self::get_session_key()]);
-		//exit('sdfs');
+
 		$is_ajax = eddfunnels_set( $_POST, 'edd_ajax' );
 
+		if( ! self::initial_checks() ) {
+			return;
+		}
 
-		$cart = edd_get_cart_contents();
-
-		$download = end( $cart );
 		
-		$download_id = eddfunnels_set( $download, 'id' );
-
-		if ( ! $download_id ) {
-			exit('not donwload id');
-			return;
-		}
-
-		self::$id = $download_id;
-
-		if ( self::already_done() ) {
-			//exit('already done');
-			return;
-		}
-
-		if ( ! self::is_has_funnel() ) {
-			exit('not has funnel');
-			return;
-		}
-
 		if ( $is_ajax ) {
 
 			/*$is_modal = self::is_modal();
@@ -53,6 +57,34 @@ class EDD_Funnels_Loader
 		self::do_funnel();
 		do_action('edd_funnels/after_funnel_start', self::$id, self::get_session_data() );
 
+	}
+
+	/**
+	 * [initial_checks description]
+	 * @return [type] [description]
+	 */
+	static function initial_checks() {
+		$cart = edd_get_cart_contents();
+
+		$download = end( $cart );
+		
+		$download_id = eddfunnels_set( $download, 'id' );
+
+		if ( ! $download_id ) {
+			return;
+		}
+
+		self::$id = $download_id;
+
+		if ( self::already_done() ) {
+			return;
+		}
+
+		if ( ! self::is_has_funnel() ) {
+			return;
+		}
+
+		return true;
 	}
 
 	/**
@@ -353,3 +385,5 @@ class EDD_Funnels_Loader
 add_action('edd_pre_process_purchase', array('EDD_Funnels_Loader', 'init'));
 add_action('edd_empty_cart', array('EDD_Funnels_Loader', 'on_empty_cart' ) );
 //add_action('edd_checkout_form_top', array('EDD_Funnels_Loader', 'init_funnel') );
+
+add_action('wp_enqueue_scripts', array('EDD_Funnels_Loader', 'newinit'));

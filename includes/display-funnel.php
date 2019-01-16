@@ -127,13 +127,12 @@ class EDD_Funnels_Display_Funnel
 			}
 		}*/ 
 		else {
-
 			if ( self::$is_ajax || self::$edd_ajax ) {
+				//printr($step);
 				$obj_id = eddfunnels_set( $step, 'object_id' );
-				$page = get_post( $obj_id );
-
-				if ( $page ) {
-					$content = apply_filters( 'the_content', $page->post_content );
+				
+				if ( $obj_id ) {
+					$content = apply_filters( 'the_content', $obj_id );
 					EDD_Funnels_Loader::up_step();
 
 					/*if ( self::is_next_bump($index) ) {
@@ -171,7 +170,7 @@ class EDD_Funnels_Display_Funnel
 	static protected function bump($step, $index) {
 
 		if ( $index == 0 ) {
-			$checkout_page = edd_get_option( 'purchase_page', false );
+			/*$checkout_page = edd_get_option( 'purchase_page', false );
 
 			if ( $checkout_page && get_page( $checkout_page ) && ! is_page( $checkout_page ) ) {
 
@@ -185,7 +184,11 @@ class EDD_Funnels_Display_Funnel
 					wp_redirect( esc_url( $url ) );exit;
 				}
 				//wp_redirect( esc_url($url) );exit;
-			}
+			}*/
+			EDD_Funnels_Loader::up_step();
+			$session = EDD_Funnels_Loader::get_session_data();
+			$step = eddfunnels_set( eddfunnels_set( $session, 'meta'), 1 );
+			self::run($step, 1);
 		} else {
 			$obj_id = eddfunnels_set( $step, 'object_id' );
 			//$download = get_post( $obj_id );
@@ -346,21 +349,22 @@ class EDD_Funnels_Display_Funnel
 
 		self::init();
 
-		if ( ! self::$doing ) {
+		/*if ( ! self::$doing ) {
 			return;
-		}
+		}*/
 		if ( ! eddfunnels_set( self::$session, 'id' ) ) {
 			return;
 		}
 		if ( eddfunnels_set( self::$session, 'finished' ) ) {
 			return;
 		}
+
 		$meta = eddfunnels_set( self::$session, 'meta' );
-		$index = eddfunnels_set( self::$session, 'step' );
-		$step = eddfunnels_set( $meta, $index );
+		//$index = eddfunnels_set( self::$session, 'step' );
+		$step = eddfunnels_set( $meta, 0 );
 		
 		if ( $step && eddfunnels_set( $step, 'type') === 'bump' ) {
-			EDD_Funnels_Loader::up_step();
+			//EDD_Funnels_Loader::up_step();
 			self::render_bump($step);
 		}
 	}
@@ -410,6 +414,14 @@ class EDD_Funnels_Display_Funnel
 			//}
 		//}
 	}
+
+	static function head_content() {
+		$session = EDD_Funnels_Loader::get_session_data();
+
+		if ( eddfunnels_set( $session, 'id' ) && ! eddfunnels_set( $session, 'finished') ) {
+			echo '<meta name="edd-funnels-session-enabled" content="true" />'."\n";
+		}
+	}
 }
 
 add_filter('the_content', array('EDD_Funnels_Display_Funnel', 'content_filter'));
@@ -419,3 +431,4 @@ add_action('edd_purchase_form_before_cc_form', array('EDD_Funnels_Display_Funnel
 add_action( 'wp_enqueue_scripts', array( 'EDD_Funnels_Display_Funnel', 'enqueue' ) );
 
 add_action('wp_footer', array('EDD_Funnels_Display_Funnel', 'modal_content'));
+add_action('wp_head', array('EDD_Funnels_Display_Funnel', 'head_content'));
