@@ -294,12 +294,12 @@ class EDD_Funnels_Display_Funnel
 				EDD_Funnels_Loader::up_step();
 			}
 
-			$buttons = '<div class="clearfix"></div><div class="edd-funnels-steps-buttons">';
+			/*$buttons = '<div class="clearfix"></div><div class="edd-funnels-steps-buttons">';
 			$buttons .= '<a href="javascript:void(0);" class="edd-funnels-btn-next btn btn-primary">' . esc_html__( 'Next', 'edd-funnels' ) . '</a><span class="edd-loading-ajax edd-loading hide"></span>';
 			//$buttons .= '<a href="javascript:void(0);" class="edd-funnels-btn-skip">' . esc_html__( 'Skip', 'edd-funnels' ) . '</a>';
 			$buttons .= '</div>';
 
-			$content .= $buttons;
+			$content .= $buttons;*/
 		}
 
 		return $content;
@@ -422,6 +422,38 @@ class EDD_Funnels_Display_Funnel
 			echo '<meta name="edd-funnels-session-enabled" content="true" />'."\n";
 		}
 	}
+
+	/**
+	 * EDD Funnels button shortcode.
+	 *
+	 * @param  [type] $atts    [description]
+	 * @param  [type] $content [description]
+	 * @return [type]          [description]
+	 */
+	static function shortcode_button( $atts, $content = null ) {
+
+		extract(shortcode_atts( array(
+			'classes'		=> ''
+		), $atts));
+
+		$output = '';
+
+		self::init();
+
+		if ( self::$doing ) {
+
+			$session = EDD_Funnels_Loader::get_session_data();
+			$index = eddfunnels_set( $session, 'step' );
+
+			$output .= '<div class="clearfix"></div><div class="edd-funnels-steps-buttons">';
+			$output .= '<a href="javascript:void(0);" class="edd-funnels-btn-next btn btn-primary '.$classes.'">' . $content . '</a><span class="edd-loading-ajax edd-loading hide"></span>';
+
+			$output .= '</div>';
+
+		}
+
+		return $output;
+	}
 }
 
 add_filter('the_content', array('EDD_Funnels_Display_Funnel', 'content_filter'));
@@ -432,3 +464,5 @@ add_action( 'wp_enqueue_scripts', array( 'EDD_Funnels_Display_Funnel', 'enqueue'
 
 add_action('wp_footer', array('EDD_Funnels_Display_Funnel', 'modal_content'));
 add_action('wp_head', array('EDD_Funnels_Display_Funnel', 'head_content'));
+
+add_shortcode('edd_funnels_button', array('EDD_Funnels_Display_Funnel', 'shortcode_button'));
