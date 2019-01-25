@@ -12,11 +12,26 @@
 </div>
 <?php while( $query->have_posts() ) : $query->the_post(); ?>
 	<div class="edd-funnel-bump-item">
-		<?php $uniqid = uniqid() ?>
+		<?php 
+			$uniqid = uniqid();
+			$cart = edd_get_cart_contents(); 
+
+			$exists = false;
+			foreach( $cart as $cart_item ) {
+				if ($cart_item['id'] == $download->ID) {
+					$exists = true;
+					break;
+				}
+			}
+		?>
 		<div id="edd_funnels_add_to_cart_status"></div>
 		<div class="edd-funnel-item">
 			<div class="edd-funnel-checkbox">
-				<input type="checkbox" class="edd-funnels-add-to-cart" data-id="<?php the_ID() ?>" id="edd-funnel-checkbox-<?php echo esc_attr( $uniqid ) ?>">
+				<input type="checkbox" 
+				  class="edd-funnels-add-to-cart" 
+				  data-id="<?php the_ID() ?>" 
+				  id="edd-funnel-checkbox-<?php echo esc_attr( $uniqid ) ?>"
+				  <?php if($exists): ?> checked <?php endif; ?>>
 			</div>
 			<div class="edd-funnel-item-detail">
 				<h5>

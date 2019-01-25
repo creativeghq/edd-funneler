@@ -41,8 +41,8 @@ class EDD_Funnels_Display_Funnel
 			if ( esc_attr( eddfunnels_set( $_GET, 'show_modal') ) ) {
 			}
 
-			wp_enqueue_style( 'edd-funnels-frontend', EDDFS_URL . 'assets/css/edd-funnels-frontend.css' );
 		}
+		wp_enqueue_style( 'edd-funnels-frontend', EDDFS_URL . 'assets/css/edd-funnels-frontend.css' );
 	}
 
 	/**
