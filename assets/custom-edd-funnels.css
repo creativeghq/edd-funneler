@@ -1,0 +1,63 @@
+.funneler_selections {
+	margin-top:20px;
+	
+}
+.selection_option {
+	border-bottom: 5px solid #0E4A02;
+    padding: 10px;
+    color: #000;
+    background-color: #D8DAD9;
+    border-radius: 5px;
+    display: inline-block;
+    width: 85%;
+    vertical-align: middle;
+
+}
+.selection_option select {
+	width:50%;
+}
+.funneler_selections .step {
+	color: #fff;
+    border-radius: 50%;
+    background-color: #0E4A02;
+    width: 35px;
+    display: inline-block;
+    text-align: center;
+    padding: 10px;
+    font-size: 27px;
+    vertical-align: middle;
+}
+.remove_btn {
+	color: #fff;
+    background-color: #B00801;
+    border-radius: 50%;
+    font-weight: bold;
+    float: right;
+    cursor: pointer;
+    padding: 9px;
+    width: 25x;
+    font-size: 16px;
+    width: 38px;
+}
+.selected_desc {
+	vertical-align: top;
+    width: 120px;
+    font-size: 14px;
+    font-weight: bold;
+    display: inline-block;
+}
+
+.funneler_add_option {
+	margin-top:20px !important;
+	border: 1px solid #eee;
+	padding:10px;
+}
+.funneler_add_option label {
+	width:50px;
+}
+.select_modal textarea{
+
+}
+.pretty {
+	margin-top:10px;
+}
